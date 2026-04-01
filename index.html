@@ -460,8 +460,19 @@ footer { margin-top: 4px; font-size: 11px; color: var(--text-muted); display: fl
 
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", function() {
-      navigator.serviceWorker.register("service-worker.js")
-        .catch(function(err) { console.error("Service worker registration failed:", err); });
+      // Unregister all old service workers first, then re-register fresh
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        var unregisterPromises = registrations.map(function(r) { return r.unregister(); });
+        return Promise.all(unregisterPromises);
+      }).then(function() {
+        // Clear all caches
+        return caches.keys().then(function(keys) {
+          return Promise.all(keys.map(function(key) { return caches.delete(key); }));
+        });
+      }).then(function() {
+        // Re-register the service worker fresh
+        return navigator.serviceWorker.register("service-worker.js");
+      }).catch(function(err) { console.error("Service worker error:", err); });
     });
   }
 
