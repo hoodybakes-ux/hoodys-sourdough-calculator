@@ -1,5 +1,5 @@
 // Simple offline-first service worker for Hoody's Hydration Calculator
-const CACHE_NAME = 'hoody-hydration-final-v1';
+const CACHE_NAME = 'hoody-hydration-final-v2';
 const ASSETS = [
   './',
   './index.html',
