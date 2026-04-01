@@ -1,827 +1,472 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hoody's Hydration Calculator</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hoody's Hydration Calculator</title>
+<meta name="description"
+content="Hoody's Hydration Calculator – easy sourdough hydration and baker's percentage calculator that includes the flour and water in your starter." />
 
-  <meta name="description"
-        content="Hoody's Hydration Calculator – easy sourdough hydration and baker's percentage calculator that includes the flour and water in your starter." />
+<!-- Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-H65ZJ62NBY"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-H65ZJ62NBY');
 
-  <!-- Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-H65ZJ62NBY"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-    gtag('config', 'G-H65ZJ62NBY');
-  </script>
-
-  <!-- Icons & PWA -->
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
-  <link rel="apple-touch-icon" href="icons/icon-192.png" />
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#0f777e" />
-
-  <style>
-    :root {
-      --bg: #f6f0e8;
-      --card-bg: #fffaf3;
-      --accent: #0f777e;
-      --accent-soft: #e2f3f4;
-      --accent-strong: #0a5a60;
-      --text-main: #21313a;
-      --text-muted: #7a8287;
-      --border-subtle: #e5ddd2;
-      --radius-lg: 18px;
-      --radius-pill: 999px;
-      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  // PWA TRACKING: fire an event when app is launched from home screen
+  window.addEventListener('DOMContentLoaded', function() {
+    var isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true;
+    if (isStandalone) {
+      gtag('event', 'pwa_launch', {
+        event_category: 'PWA',
+        event_label: 'Launched from home screen'
+      });
     }
+  });
 
-    * { box-sizing: border-box; }
+  // PWA INSTALL TRACKING: fire an event when user adds to home screen
+  window.addEventListener('appinstalled', function() {
+    gtag('event', 'pwa_install', {
+      event_category: 'PWA',
+      event_label: 'Added to home screen'
+    });
+  });
+</script>
 
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: var(--font-main);
-      background: radial-gradient(circle at top, #fff7eb 0, #f6f0e8 45%, #f9fafb 100%);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-      padding: 24px 16px;
-    }
+<!-- Icons & PWA -->
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/icon-192.png" />
+<link rel="manifest" href="manifest.json" />
+<meta name="theme-color" content="#0f777e" />
 
-    .app-shell {
-      max-width: 1040px;
-      width: 100%;
-      background: #fffaf3;
-      border-radius: 26px;
-      box-shadow: 0 30px 80px rgba(15, 23, 42, 0.18);
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-      border: 1px solid rgba(209,213,219,0.4);
-    }
-
-    header {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 18px;
-      align-items: center;
-      padding-bottom: 10px;
-      border-bottom: 1px solid rgba(148,163,184,0.4);
-    }
-
-    .brand-mark img {
-      width: 120px;
-      max-width: 32vw;
-      height: auto;
-      display: block;
-    }
-
-    .brand-line {
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.18em;
-      color: var(--text-muted);
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 28px;
-      letter-spacing: -0.03em;
-      color: var(--accent-strong);
-    }
-
-    .subheading {
-      font-size: 14px;
-      color: var(--text-muted);
-      margin: 4px 0 0;
-      max-width: 520px;
-    }
-
-    main {
-      display: grid;
-      grid-template-columns: minmax(0,1.05fr) minmax(0,0.95fr);
-      gap: 18px;
-      align-items: flex-start;
-    }
-
-    @media (max-width: 880px) {
-      .app-shell { padding: 16px; border-radius: 18px; }
-      header { grid-template-columns: minmax(0,1fr); }
-      main { grid-template-columns: minmax(0,1fr); }
-    }
-
-    .card {
-      background: var(--card-bg);
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border-subtle);
-      box-shadow: 0 12px 30px rgba(15,119,126,0.18);
-      padding: 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(circle at top right,
-                  rgba(15,119,126,0.12), transparent 60%);
-      pointer-events: none;
-    }
-
-    .card-inner { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; }
-
-    .card-heading-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .card-title { font-size: 16px; font-weight: 600; }
-
-    .card-pill {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-      padding: 4px 10px;
-      border-radius: var(--radius-pill);
-      border: 1px solid rgba(15,119,126,0.4);
-      background: rgba(226,243,244,0.96);
-      color: var(--accent-strong);
-      white-space: nowrap;
-    }
-
-    .card-description { font-size: 13px; color: var(--text-muted); }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(2,minmax(0,1fr));
-      gap: 10px 14px;
-    }
-
-    @media (max-width: 640px) { .grid-2 { grid-template-columns: minmax(0,1fr); } }
-
-    label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 2px;
-    }
-
-    label .unit {
-      font-size: 11px;
-      background: #f3f4f6;
-      padding: 2px 7px;
-      border-radius: var(--radius-pill);
-      border: 1px solid #e5e7eb;
-    }
-
-    input[type="number"] {
-      width: 100%;
-      padding: 8px 9px;
-      border-radius: 10px;
-      border: 1px solid var(--border-subtle);
-      background: #fffdf7;
-      font-size: 13px;
-      color: var(--text-main);
-      outline: none;
-      appearance: textfield;
-    }
-
-    input[type="number"]:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px rgba(15,119,126,0.3);
-      background: #ffffff;
-    }
-
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
-    }
-
-    .helper-text {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 2px;
-    }
-
-    .actions-row {
-      display: flex;
-      justify-content: flex-start;
-      gap: 8px;
-      margin-top: 6px;
-      flex-wrap: wrap;
-    }
-
-    .btn {
-      border-radius: var(--radius-pill);
-      border: none;
-      padding: 7px 14px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg,#0f777e,#16a19f);
-      color: #ecfdf5;
-      box-shadow: 0 12px 22px rgba(15,119,126,0.45);
-    }
-
-    .btn-secondary {
-      background: #fff7eb;
-      color: #374151;
-      border: 1px solid #e5ddd2;
-    }
-
-    .presets-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      font-size: 11px;
-      align-items: center;
-      margin-top: 8px;
-    }
-
-    .preset-label {
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-size: 10px;
-      color: var(--text-muted);
-    }
-
-    .preset-pill {
-      border-radius: var(--radius-pill);
-      padding: 4px 9px;
-      border: 1px solid rgba(148,163,184,0.8);
-      background: #fffdf7;
-      font-size: 11px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-    }
-
-    .preset-pill strong { color: var(--accent-strong); }
-    .preset-pill .note { color: var(--text-muted); font-size: 10px; }
-
-    .tip-box {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 12px;
-      background: rgba(226,243,244,0.8);
-      border: 1px solid rgba(15,119,126,0.35);
-      font-size: 11px;
-      color: var(--accent-strong);
-      display: flex;
-      gap: 8px;
-    }
-
-    .tip-dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 999px;
-      margin-top: 4px;
-      background: var(--accent);
-    }
-
-    .results-grid { display: grid; gap: 12px; }
-
-    .hydration-banner {
-      border-radius: 16px;
-      padding: 14px;
-      background: radial-gradient(circle at top left,#ecfdf5,#c7f3f3);
-      border: 1px solid rgba(34,197,187,0.7);
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: 10px 14px;
-      align-items: center;
-    }
-
-    .hydration-chip {
-      width: 64px;
-      height: 64px;
-      border-radius: 20px;
-      background: radial-gradient(circle at 25% 20%,#fefce8,#2dd4bf);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-weight: 700;
-    }
-
-    .hydration-chip .value { font-size: 20px; }
-    .hydration-chip .unit {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-    }
-
-    .hydration-label {
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--text-muted);
-    }
-
-    .hydration-summary { font-size: 13px; }
-    .hydration-sub { font-size: 11px; color: var(--text-muted); }
-
-    .totals-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    .pill-stat {
-      flex: 1 1 120px;
-      border-radius: 999px;
-      background: #fffdf7;
-      border: 1px dashed #e5ddd2;
-      padding: 6px 10px;
-      font-size: 11px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .pill-stat .label {
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-size: 10px;
-    }
-
-    .bakers-table {
-      border-radius: 14px;
-      border: 1px solid rgba(148,163,184,0.6);
-      overflow: hidden;
-      background: #f9fafb;
-      font-size: 12px;
-    }
-
-    .bakers-header,
-    .bakers-row {
-      display: grid;
-      grid-template-columns: 1.1fr 0.7fr 0.7fr;
-      padding: 7px 10px;
-      align-items: center;
-    }
-
-    .bakers-header {
-      background: linear-gradient(90deg,#0f777e,#16a19f);
-      color: #ecfdf5;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.14em;
-    }
-
-    .bakers-row:nth-child(even) { background: #f3f4f6; }
-
-    .bakers-note {
-      font-size: 11px;
-      color: var(--text-muted);
-      padding: 8px 9px 6px;
-      border-top: 1px dashed rgba(148,163,184,0.85);
-    }
-
-    footer {
-      margin-top: 4px;
-      font-size: 11px;
-      color: var(--text-muted);
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .footer-left { display: flex; align-items: center; gap: 8px; }
-    .footer-left img { height: 26px; width: auto; }
-    .footer-link { color: var(--accent-strong); font-weight: 500; text-decoration: none; }
-  </style>
+<style>
+:root {
+  --bg: #f6f0e8;
+  --card-bg: #fffaf3;
+  --accent: #0f777e;
+  --accent-soft: #e2f3f4;
+  --accent-strong: #0a5a60;
+  --text-main: #21313a;
+  --text-muted: #7a8287;
+  --border-subtle: #e5ddd2;
+  --radius-lg: 18px;
+  --radius-pill: 999px;
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: var(--font-main);
+  background: radial-gradient(circle at top, #fff7eb 0, #f6f0e8 45%, #f9fafb 100%);
+  color: var(--text-main);
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+.app-shell {
+  max-width: 1040px;
+  width: 100%;
+  background: #fffaf3;
+  border-radius: 26px;
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.18);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border: 1px solid rgba(209,213,219,0.4);
+}
+header {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 18px;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(148,163,184,0.4);
+}
+.brand-mark img { width: 120px; max-width: 32vw; height: auto; display: block; }
+.brand-line { font-size: 13px; text-transform: uppercase; letter-spacing: 0.18em; color: var(--text-muted); }
+h1 { margin: 0; font-size: 28px; letter-spacing: -0.03em; color: var(--accent-strong); }
+.subheading { font-size: 14px; color: var(--text-muted); margin: 4px 0 0; max-width: 520px; }
+main {
+  display: grid;
+  grid-template-columns: minmax(0,1.05fr) minmax(0,0.95fr);
+  gap: 18px;
+  align-items: flex-start;
+}
+@media (max-width: 880px) {
+  .app-shell { padding: 16px; border-radius: 18px; }
+  header { grid-template-columns: minmax(0,1fr); }
+  main { grid-template-columns: minmax(0,1fr); }
+}
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 12px 30px rgba(15,119,126,0.18);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(15,119,126,0.12), transparent 60%);
+  pointer-events: none;
+}
+.card-inner { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 10px; }
+.card-heading-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.card-title { font-size: 16px; font-weight: 600; }
+.card-pill {
+  font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em;
+  padding: 4px 10px; border-radius: var(--radius-pill);
+  border: 1px solid rgba(15,119,126,0.4); background: rgba(226,243,244,0.96);
+  color: var(--accent-strong); white-space: nowrap;
+}
+.card-description { font-size: 13px; color: var(--text-muted); }
+.grid-2 { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px 14px; }
+@media (max-width: 640px) { .grid-2 { grid-template-columns: minmax(0,1fr); } }
+label {
+  font-size: 12px; font-weight: 500; color: var(--text-muted);
+  display: flex; justify-content: space-between; gap: 8px; margin-bottom: 2px;
+}
+label .unit { font-size: 11px; background: #f3f4f6; padding: 2px 7px; border-radius: var(--radius-pill); border: 1px solid #e5e7eb; }
+input[type="number"] {
+  width: 100%; padding: 8px 9px; border-radius: 10px; border: 1px solid var(--border-subtle);
+  background: #fffdf7; font-size: 13px; color: var(--text-main); outline: none; appearance: textfield;
+}
+input[type="number"]:focus { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(15,119,126,0.3); background: #ffffff; }
+input[type="number"]::-webkit-inner-spin-button, input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.helper-text { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.actions-row { display: flex; justify-content: flex-start; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+.btn { border-radius: var(--radius-pill); border: none; padding: 7px 14px; font-size: 12px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.btn-primary { background: linear-gradient(135deg,#0f777e,#16a19f); color: #ecfdf5; box-shadow: 0 12px 22px rgba(15,119,126,0.45); }
+.btn-secondary { background: #fff7eb; color: #374151; border: 1px solid #e5ddd2; }
+.presets-row { display: flex; flex-wrap: wrap; gap: 6px; font-size: 11px; align-items: center; margin-top: 8px; }
+.preset-label { text-transform: uppercase; letter-spacing: 0.12em; font-size: 10px; color: var(--text-muted); }
+.preset-pill {
+  border-radius: var(--radius-pill); padding: 4px 9px; border: 1px solid rgba(148,163,184,0.8);
+  background: #fffdf7; font-size: 11px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;
+}
+.preset-pill strong { color: var(--accent-strong); }
+.preset-pill .note { color: var(--text-muted); font-size: 10px; }
+.tip-box {
+  margin-top: 10px; padding: 10px; border-radius: 12px;
+  background: rgba(226,243,244,0.8); border: 1px solid rgba(15,119,126,0.35);
+  font-size: 11px; color: var(--accent-strong); display: flex; gap: 8px;
+}
+.tip-dot { width: 7px; height: 7px; border-radius: 999px; margin-top: 4px; background: var(--accent); }
+.results-grid { display: grid; gap: 12px; }
+.hydration-banner {
+  border-radius: 16px; padding: 14px;
+  background: radial-gradient(circle at top left,#ecfdf5,#c7f3f3);
+  border: 1px solid rgba(34,197,187,0.7);
+  display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center;
+}
+.hydration-chip {
+  width: 64px; height: 64px; border-radius: 20px;
+  background: radial-gradient(circle at 25% 20%,#fefce8,#2dd4bf);
+  display: flex; flex-direction: column; justify-content: center; align-items: center; font-weight: 700;
+}
+.hydration-chip .value { font-size: 20px; }
+.hydration-chip .unit { font-size: 11px; text-transform: uppercase; letter-spacing: 0.16em; }
+.hydration-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--text-muted); }
+.hydration-summary { font-size: 13px; }
+.hydration-sub { font-size: 11px; color: var(--text-muted); }
+.totals-row { display: flex; flex-wrap: wrap; gap: 10px; }
+.pill-stat { flex: 1 1 120px; border-radius: 999px; background: #fffdf7; border: 1px dashed #e5ddd2; padding: 6px 10px; font-size: 11px; display: flex; justify-content: space-between; }
+.pill-stat .label { color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.12em; font-size: 10px; }
+.bakers-table { border-radius: 14px; border: 1px solid rgba(148,163,184,0.6); overflow: hidden; background: #f9fafb; font-size: 12px; }
+.bakers-header, .bakers-row { display: grid; grid-template-columns: 1.1fr 0.7fr 0.7fr; padding: 7px 10px; align-items: center; }
+.bakers-header { background: linear-gradient(90deg,#0f777e,#16a19f); color: #ecfdf5; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; }
+.bakers-row:nth-child(even) { background: #f3f4f6; }
+.bakers-note { font-size: 11px; color: var(--text-muted); padding: 8px 9px 6px; border-top: 1px dashed rgba(148,163,184,0.85); }
+footer { margin-top: 4px; font-size: 11px; color: var(--text-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; align-items: center; }
+.footer-left { display: flex; align-items: center; gap: 8px; }
+.footer-left img { height: 26px; width: auto; }
+.footer-link { color: var(--accent-strong); font-weight: 500; text-decoration: none; }
+</style>
 </head>
 <body>
-  <div class="app-shell">
-    <header>
-      <div class="brand-mark">
-        <img src="icons/icon-512.png" alt="Hoody's Hydration Calculator logo" />
-      </div>
-      <div>
-        <div class="brand-line">Hoody’s Sourdough Kitchen</div>
-        <h1>Hoody’s Hydration Calculator</h1>
-        <p class="subheading">
-          Type in your dough formula and this little helper will work out your total hydration,
-          dough weight, and baker’s percentages – including the flour and water in your starter.
-        </p>
-      </div>
-    </header>
+<div class="app-shell">
+  <header>
+    <div class="brand-mark">
+      <img src="icons/icon-512.png" alt="Hoody's Hydration Calculator logo" />
+    </div>
+    <div>
+      <div class="brand-line">Hoody's Sourdough Kitchen</div>
+      <h1>Hoody's Hydration Calculator</h1>
+      <p class="subheading">
+        Type in your dough formula and this little helper will work out your total hydration,
+        dough weight, and baker's percentages – including the flour and water in your starter.
+      </p>
+    </div>
+  </header>
 
-    <main>
-      <!-- Inputs -->
-      <section class="card" aria-labelledby="inputs-title">
-        <div class="card-inner">
-          <div class="card-heading-row">
-            <div>
-              <h2 id="inputs-title" class="card-title">Dough formula inputs</h2>
-              <p class="card-description">
-                Use grams for best accuracy. Starter is counted as flour + water so your hydration
-                actually matches what’s in the bowl.
-              </p>
-            </div>
-            <div class="card-pill">Inputs</div>
+  <main>
+    <!-- Inputs -->
+    <section class="card" aria-labelledby="inputs-title">
+      <div class="card-inner">
+        <div class="card-heading-row">
+          <div>
+            <h2 id="inputs-title" class="card-title">Dough formula inputs</h2>
+            <p class="card-description">
+              Use grams for best accuracy. Starter is counted as flour + water so your hydration
+              actually matches what's in the bowl.
+            </p>
           </div>
-
-          <div class="grid-2">
-            <div>
-              <label for="flour">
-                Flour (excluding starter)
-                <span class="unit">g</span>
-              </label>
-              <input id="flour" type="number" inputmode="decimal" placeholder="e.g. 440" />
-              <p class="helper-text">Flour added straight to the bowl – not including starter flour.</p>
-            </div>
-
-            <div>
-              <label for="water">
-                Water (excluding starter)
-                <span class="unit">g</span>
-              </label>
-              <input id="water" type="number" inputmode="decimal" placeholder="e.g. 290" />
-              <p class="helper-text">All water you pour in, not counting water already in the starter.</p>
-            </div>
-
-            <div>
-              <label for="starter">
-                Starter amount
-                <span class="unit">g</span>
-              </label>
-              <input id="starter" type="number" inputmode="decimal" placeholder="e.g. 125" />
-              <p class="helper-text">Active starter added at mix.</p>
-            </div>
-
-            <div>
-              <label for="starterHydration">
-                Starter hydration
-                <span class="unit">%</span>
-              </label>
-              <input id="starterHydration" type="number" inputmode="decimal" placeholder="e.g. 100" />
-              <p class="helper-text">100% = equal flour and water. Lower is stiffer, higher is runnier.</p>
-            </div>
-
-            <div>
-              <label for="salt">
-                Salt in grams
-                <span class="unit">g</span>
-              </label>
-              <input id="salt" type="number" inputmode="decimal" placeholder="e.g. 12" />
-              <p class="helper-text">We’ll calculate salt % based on total flour.</p>
-            </div>
+          <div class="card-pill">Inputs</div>
+        </div>
+        <div class="grid-2">
+          <div>
+            <label for="flour">Flour (excluding starter)<span class="unit">g</span></label>
+            <input id="flour" type="number" inputmode="decimal" placeholder="e.g. 440" />
+            <p class="helper-text">Flour added straight to the bowl – not including starter flour.</p>
           </div>
-
-          <div class="actions-row">
-            <button id="recalculate" type="button" class="btn btn-primary">Recalculate</button>
-            <button id="resetDefaults" type="button" class="btn btn-secondary">Reset to defaults</button>
+          <div>
+            <label for="water">Water (excluding starter)<span class="unit">g</span></label>
+            <input id="water" type="number" inputmode="decimal" placeholder="e.g. 290" />
+            <p class="helper-text">All water you pour in, not counting water already in the starter.</p>
           </div>
-
-          <div class="presets-row">
-            <span class="preset-label">Hydration presets:</span>
-            <button class="preset-pill" data-hydration="65" type="button">
-              <strong>65%</strong> <span class="note">Sandwich</span>
-            </button>
-            <button class="preset-pill" data-hydration="70" type="button">
-              <strong>70%</strong> <span class="note">Everyday</span>
-            </button>
-            <button class="preset-pill" data-hydration="75" type="button">
-              <strong>75%</strong> <span class="note">Looser/open</span>
-            </button>
+          <div>
+            <label for="starter">Starter amount<span class="unit">g</span></label>
+            <input id="starter" type="number" inputmode="decimal" placeholder="e.g. 125" />
+            <p class="helper-text">Active starter added at mix.</p>
           </div>
-
-          <div class="tip-box">
-            <div class="tip-dot" aria-hidden="true"></div>
-            <div>
-              <strong>How it works:</strong>
-              All flour (including starter flour) is treated as 100%. Water is your hydration %, and
-              starter and salt are shown as baker’s percentages so you don’t have to do the maths.
-            </div>
+          <div>
+            <label for="starterHydration">Starter hydration<span class="unit">%</span></label>
+            <input id="starterHydration" type="number" inputmode="decimal" placeholder="e.g. 100" />
+            <p class="helper-text">100% = equal flour and water. Lower is stiffer, higher is runnier.</p>
+          </div>
+          <div>
+            <label for="salt">Salt in grams<span class="unit">g</span></label>
+            <input id="salt" type="number" inputmode="decimal" placeholder="e.g. 12" />
+            <p class="helper-text">We'll calculate salt % based on total flour.</p>
           </div>
         </div>
-      </section>
-
-      <!-- Results -->
-      <section class="card" aria-labelledby="results-title">
-        <div class="card-inner">
-          <div class="card-heading-row">
-            <div>
-              <h2 id="results-title" class="card-title">Hydration & baker’s percentages</h2>
-              <p class="card-description">
-                Updates as you tweak your numbers. Perfect for scaling up, changing hydration,
-                or checking that today’s dough isn’t secretly soup.
-              </p>
-            </div>
-            <div class="card-pill">Results</div>
-          </div>
-
-          <div class="results-grid">
-            <div class="hydration-banner">
-              <div class="hydration-chip">
-                <span id="overallHydrationValue" class="value">–</span>
-                <span class="unit">% H₂O</span>
-              </div>
-              <div>
-                <div class="hydration-label">Overall dough hydration</div>
-                <div class="hydration-summary" id="overallHydrationSummary">
-                  Pop your dough details in to see your hydration.
-                </div>
-                <div class="hydration-sub">
-                  Includes the flour and water from your starter, not just the base dough.
-                </div>
-              </div>
-            </div>
-
-            <div class="totals-row">
-              <div class="pill-stat">
-                <span class="label">Total flour</span>
-                <span id="totalFlour" class="value">– g</span>
-              </div>
-              <div class="pill-stat">
-                <span class="label">Total water</span>
-                <span id="totalWater" class="value">– g</span>
-              </div>
-              <div class="pill-stat">
-                <span class="label">Dough weight</span>
-                <span id="doughWeight" class="value">– g</span>
-              </div>
-            </div>
-
-            <div class="bakers-table">
-              <div class="bakers-header">
-                <div>Component</div>
-                <div>Baker’s %</div>
-                <div>Weight (g)</div>
-              </div>
-              <div class="bakers-row">
-                <div>Flour (total)</div>
-                <div id="bakersFlourPct">100%</div>
-                <div id="bakersFlourGrams">– g</div>
-              </div>
-              <div class="bakers-row">
-                <div>Water (total)</div>
-                <div id="bakersWaterPct">–%</div>
-                <div id="bakersWaterGrams">– g</div>
-              </div>
-              <div class="bakers-row">
-                <div>Starter</div>
-                <div id="bakersStarterPct">–%</div>
-                <div id="bakersStarterGrams">– g</div>
-              </div>
-              <div class="bakers-row">
-                <div>Salt</div>
-                <div id="bakersSaltPct">–%</div>
-                <div id="bakersSaltGrams">– g</div>
-              </div>
-              <div class="bakers-note">
-                Flour is always 100%. Water % equals hydration. Starter and salt % are based on total flour,
-                including starter flour.
-              </div>
-            </div>
+        <div class="actions-row">
+          <button id="recalculate" type="button" class="btn btn-primary">Recalculate</button>
+          <button id="resetDefaults" type="button" class="btn btn-secondary">Reset to defaults</button>
+        </div>
+        <div class="presets-row">
+          <span class="preset-label">Hydration presets:</span>
+          <button class="preset-pill" data-hydration="65" type="button"><strong>65%</strong> <span class="note">Sandwich</span></button>
+          <button class="preset-pill" data-hydration="70" type="button"><strong>70%</strong> <span class="note">Everyday</span></button>
+          <button class="preset-pill" data-hydration="75" type="button"><strong>75%</strong> <span class="note">Looser/open</span></button>
+        </div>
+        <div class="tip-box">
+          <div class="tip-dot" aria-hidden="true"></div>
+          <div>
+            <strong>How it works:</strong>
+            All flour (including starter flour) is treated as 100%. Water is your hydration %, and
+            starter and salt are shown as baker's percentages so you don't have to do the maths.
           </div>
         </div>
-      </section>
-    </main>
-
-    <footer>
-      <div class="footer-left">
-        <img src="Logo.png" alt="Hoody's Sourdough Kitchen logo" />
-        <span>Made with 🥖 by Hoody’s Sourdough Kitchen</span>
       </div>
-      <span>
-        TikTok:
-        <a class="footer-link" href="https://www.tiktok.com/@hoody_sourdough_kitchen" target="_blank" rel="noreferrer">
-          @hoody_sourdough_kitchen
-        </a>
-      </span>
-    </footer>
-  </div>
+    </section>
 
-  <script>
-    (function () {
-      const flourInput = document.getElementById("flour");
-      const waterInput = document.getElementById("water");
-      const starterInput = document.getElementById("starter");
-      const starterHydrationInput = document.getElementById("starterHydration");
-      const saltInput = document.getElementById("salt");
+    <!-- Results -->
+    <section class="card" aria-labelledby="results-title">
+      <div class="card-inner">
+        <div class="card-heading-row">
+          <div>
+            <h2 id="results-title" class="card-title">Hydration & baker's percentages</h2>
+            <p class="card-description">
+              Updates as you tweak your numbers. Perfect for scaling up, changing hydration,
+              or checking that today's dough isn't secretly soup.
+            </p>
+          </div>
+          <div class="card-pill">Results</div>
+        </div>
+        <div class="results-grid">
+          <div class="hydration-banner">
+            <div class="hydration-chip">
+              <span id="overallHydrationValue" class="value">–</span>
+              <span class="unit">% H₂O</span>
+            </div>
+            <div>
+              <div class="hydration-label">Overall dough hydration</div>
+              <div class="hydration-summary" id="overallHydrationSummary">Pop your dough details in to see your hydration.</div>
+              <div class="hydration-sub">Includes the flour and water from your starter, not just the base dough.</div>
+            </div>
+          </div>
+          <div class="totals-row">
+            <div class="pill-stat"><span class="label">Total flour</span><span id="totalFlour" class="value">– g</span></div>
+            <div class="pill-stat"><span class="label">Total water</span><span id="totalWater" class="value">– g</span></div>
+            <div class="pill-stat"><span class="label">Dough weight</span><span id="doughWeight" class="value">– g</span></div>
+          </div>
+          <div class="bakers-table">
+            <div class="bakers-header"><div>Component</div><div>Baker's %</div><div>Weight (g)</div></div>
+            <div class="bakers-row"><div>Flour (total)</div><div id="bakersFlourPct">100%</div><div id="bakersFlourGrams">– g</div></div>
+            <div class="bakers-row"><div>Water (total)</div><div id="bakersWaterPct">–%</div><div id="bakersWaterGrams">– g</div></div>
+            <div class="bakers-row"><div>Starter</div><div id="bakersStarterPct">–%</div><div id="bakersStarterGrams">– g</div></div>
+            <div class="bakers-row"><div>Salt</div><div id="bakersSaltPct">–%</div><div id="bakersSaltGrams">– g</div></div>
+            <div class="bakers-note">Flour is always 100%. Water % equals hydration. Starter and salt % are based on total flour, including starter flour.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
 
-      const overallHydrationValue = document.getElementById("overallHydrationValue");
-      const overallHydrationSummary = document.getElementById("overallHydrationSummary");
+  <footer>
+    <div class="footer-left">
+      <img src="Logo.png" alt="Hoody's Sourdough Kitchen logo" />
+      <span>Made with 🥖 by Hoody's Sourdough Kitchen</span>
+    </div>
+    <span>TikTok: <a class="footer-link" href="https://www.tiktok.com/@hoody_sourdough_kitchen" target="_blank" rel="noreferrer">@hoody_sourdough_kitchen</a></span>
+  </footer>
+</div>
 
-      const totalFlourEl = document.getElementById("totalFlour");
-      const totalWaterEl = document.getElementById("totalWater");
-      const doughWeightEl = document.getElementById("doughWeight");
+<script>
+(function () {
+  const flourInput = document.getElementById("flour");
+  const waterInput = document.getElementById("water");
+  const starterInput = document.getElementById("starter");
+  const starterHydrationInput = document.getElementById("starterHydration");
+  const saltInput = document.getElementById("salt");
+  const overallHydrationValue = document.getElementById("overallHydrationValue");
+  const overallHydrationSummary = document.getElementById("overallHydrationSummary");
+  const totalFlourEl = document.getElementById("totalFlour");
+  const totalWaterEl = document.getElementById("totalWater");
+  const doughWeightEl = document.getElementById("doughWeight");
+  const bakersFlourPctEl = document.getElementById("bakersFlourPct");
+  const bakersFlourGramsEl = document.getElementById("bakersFlourGrams");
+  const bakersWaterPctEl = document.getElementById("bakersWaterPct");
+  const bakersWaterGramsEl = document.getElementById("bakersWaterGrams");
+  const bakersStarterPctEl = document.getElementById("bakersStarterPct");
+  const bakersStarterGramsEl = document.getElementById("bakersStarterGrams");
+  const bakersSaltPctEl = document.getElementById("bakersSaltPct");
+  const bakersSaltGramsEl = document.getElementById("bakersSaltGrams");
+  const recalcBtn = document.getElementById("recalculate");
+  const resetBtn = document.getElementById("resetDefaults");
+  const presetButtons = document.querySelectorAll(".preset-pill");
 
-      const bakersFlourPctEl = document.getElementById("bakersFlourPct");
-      const bakersFlourGramsEl = document.getElementById("bakersFlourGrams");
-      const bakersWaterPctEl = document.getElementById("bakersWaterPct");
-      const bakersWaterGramsEl = document.getElementById("bakersWaterGrams");
-      const bakersStarterPctEl = document.getElementById("bakersStarterPct");
-      const bakersStarterGramsEl = document.getElementById("bakersStarterGrams");
-      const bakersSaltPctEl = document.getElementById("bakersSaltPct");
-      const bakersSaltGramsEl = document.getElementById("bakersSaltGrams");
+  const defaultValues = { flour: 440, water: 290, starter: 125, starterHydration: 100, salt: 12 };
 
-      const recalcBtn = document.getElementById("recalculate");
-      const resetBtn = document.getElementById("resetDefaults");
-      const presetButtons = document.querySelectorAll(".preset-pill");
+  function setDefaults() {
+    flourInput.value = defaultValues.flour;
+    waterInput.value = defaultValues.water;
+    starterInput.value = defaultValues.starter;
+    starterHydrationInput.value = defaultValues.starterHydration;
+    saltInput.value = defaultValues.salt;
+    updateResults();
+  }
 
-      const defaultValues = {
-        flour: 440,
-        water: 290,
-        starter: 125,
-        starterHydration: 100,
-        salt: 12,
-      };
+  function parseNumber(input) {
+    if (!input || typeof input.value !== "string") return 0;
+    const value = parseFloat(input.value.replace(",", "."));
+    return isFinite(value) ? value : 0;
+  }
 
-      function setDefaults() {
-        flourInput.value = defaultValues.flour;
-        waterInput.value = defaultValues.water;
-        starterInput.value = defaultValues.starter;
-        starterHydrationInput.value = defaultValues.starterHydration;
-        saltInput.value = defaultValues.salt;
-        updateResults();
-      }
+  function formatGrams(value) {
+    if (!isFinite(value)) return "– g";
+    if (Math.abs(value) < 0.01) return "0 g";
+    const rounded = Math.abs(value) >= 100 ? Math.round(value) : Math.round(value * 10) / 10;
+    return rounded + " g";
+  }
 
-      function parseNumber(input) {
-        if (!input || typeof input.value !== "string") return 0;
-        const value = parseFloat(input.value.replace(",", "."));
-        return isFinite(value) ? value : 0;
-      }
+  function formatPercent(value) {
+    if (!isFinite(value)) return "–%";
+    const rounded = Math.abs(value) >= 100 ? Math.round(value) : Math.round(value * 10) / 10;
+    return rounded + "%";
+  }
 
-      function formatGrams(value) {
-        if (!isFinite(value)) return "– g";
-        if (Math.abs(value) < 0.01) return "0 g";
-        const rounded =
-          Math.abs(value) >= 100 ? Math.round(value) : Math.round(value * 10) / 10;
-        return rounded + " g";
-      }
+  function getStarterComponents(starterAmount, starterHydration) {
+    if (starterAmount <= 0) return { flour: 0, water: 0 };
+    if (starterHydration < 0) starterHydration = 0;
+    if (starterHydration === 0) return { flour: starterAmount, water: 0 };
+    const h = starterHydration / 100;
+    const starterFlour = starterAmount / (1 + h);
+    const starterWater = starterAmount - starterFlour;
+    return { flour: starterFlour, water: starterWater };
+  }
 
-      function formatPercent(value) {
-        if (!isFinite(value)) return "–%";
-        const rounded =
-          Math.abs(value) >= 100 ? Math.round(value) : Math.round(value * 10) / 10;
-        return rounded + "%";
-      }
+  function updateResults() {
+    const flour = parseNumber(flourInput);
+    const water = parseNumber(waterInput);
+    const starter = parseNumber(starterInput);
+    const starterHydration = parseNumber(starterHydrationInput);
+    const salt = parseNumber(saltInput);
+    const starterParts = getStarterComponents(starter, starterHydration);
+    const totalFlour = flour + starterParts.flour;
+    const totalWater = water + starterParts.water;
+    const doughWeight = totalFlour + totalWater + salt;
 
-      function getStarterComponents(starterAmount, starterHydration) {
-        if (starterAmount <= 0) {
-          return { flour: 0, water: 0 };
-        }
+    totalFlourEl.textContent = totalFlour > 0 ? formatGrams(totalFlour) : "– g";
+    totalWaterEl.textContent = totalWater > 0 ? formatGrams(totalWater) : "– g";
+    doughWeightEl.textContent = doughWeight > 0 ? formatGrams(doughWeight) : "– g";
 
-        if (starterHydration < 0) starterHydration = 0;
-        if (starterHydration === 0) {
-          return { flour: starterAmount, water: 0 };
-        }
+    if (totalFlour > 0 && totalWater >= 0) {
+      const hydration = (totalWater / totalFlour) * 100;
+      const hydrationDisplay = formatPercent(hydration);
+      overallHydrationValue.textContent = hydrationDisplay.replace("%", "");
+      overallHydrationSummary.textContent = "Your dough is sitting at around " + hydrationDisplay + " hydration.";
+    } else {
+      overallHydrationValue.textContent = "–";
+      overallHydrationSummary.textContent = "Pop your dough details in to see your hydration.";
+    }
 
-        const h = starterHydration / 100;
-        const starterFlour = starterAmount / (1 + h);
-        const starterWater = starterAmount - starterFlour;
-        return { flour: starterFlour, water: starterWater };
-      }
+    if (totalFlour > 0) {
+      bakersFlourPctEl.textContent = "100%";
+      bakersFlourGramsEl.textContent = formatGrams(totalFlour);
+      bakersWaterPctEl.textContent = formatPercent((totalWater / totalFlour) * 100);
+      bakersWaterGramsEl.textContent = formatGrams(totalWater);
+      bakersStarterPctEl.textContent = formatPercent((starter / totalFlour) * 100);
+      bakersStarterGramsEl.textContent = formatGrams(starter);
+      bakersSaltPctEl.textContent = salt > 0 ? formatPercent((salt / totalFlour) * 100) : "–%";
+      bakersSaltGramsEl.textContent = salt > 0 ? formatGrams(salt) : "– g";
+    } else {
+      bakersFlourPctEl.textContent = "100%";
+      bakersFlourGramsEl.textContent = "– g";
+      bakersWaterPctEl.textContent = "–%"; bakersWaterGramsEl.textContent = "– g";
+      bakersStarterPctEl.textContent = "–%"; bakersStarterGramsEl.textContent = "– g";
+      bakersSaltPctEl.textContent = "–%"; bakersSaltGramsEl.textContent = "– g";
+    }
+  }
 
-      function updateResults() {
-        const flour = parseNumber(flourInput);
-        const water = parseNumber(waterInput);
-        const starter = parseNumber(starterInput);
-        const starterHydration = parseNumber(starterHydrationInput);
-        const salt = parseNumber(saltInput);
+  function applyHydrationPreset(targetHydrationPercent) {
+    const flour = parseNumber(flourInput);
+    const starter = parseNumber(starterInput);
+    const starterHydration = parseNumber(starterHydrationInput);
+    const starterParts = getStarterComponents(starter, starterHydration);
+    const totalFlour = flour + starterParts.flour;
+    if (totalFlour <= 0) return;
+    const requiredTotalWater = (targetHydrationPercent / 100) * totalFlour;
+    let requiredExtraWater = requiredTotalWater - starterParts.water;
+    if (!isFinite(requiredExtraWater) || requiredExtraWater < 0) requiredExtraWater = 0;
+    waterInput.value = Math.abs(requiredExtraWater) >= 100 ? Math.round(requiredExtraWater) : Math.round(requiredExtraWater * 10) / 10;
+    updateResults();
+  }
 
-        const starterParts = getStarterComponents(starter, starterHydration);
-        const starterFlour = starterParts.flour;
-        const starterWater = starterParts.water;
+  [flourInput, waterInput, starterInput, starterHydrationInput, saltInput].forEach(function(el) {
+    el.addEventListener("input", updateResults);
+  });
+  recalcBtn.addEventListener("click", updateResults);
+  resetBtn.addEventListener("click", setDefaults);
+  presetButtons.forEach(function(btn) {
+    btn.addEventListener("click", function() {
+      const hydration = parseFloat(btn.getAttribute("data-hydration"));
+      if (!isNaN(hydration)) applyHydrationPreset(hydration);
+    });
+  });
 
-        const totalFlour = flour + starterFlour;
-        const totalWater = water + starterWater;
-        const doughWeight = totalFlour + totalWater + salt;
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function() {
+      navigator.serviceWorker.register("service-worker.js")
+        .catch(function(err) { console.error("Service worker registration failed:", err); });
+    });
+  }
 
-        totalFlourEl.textContent =
-          totalFlour > 0 ? formatGrams(totalFlour) : "– g";
-        totalWaterEl.textContent =
-          totalWater > 0 ? formatGrams(totalWater) : "– g";
-        doughWeightEl.textContent =
-          doughWeight > 0 ? formatGrams(doughWeight) : "– g";
-
-        if (totalFlour > 0 && totalWater >= 0) {
-          const hydration = (totalWater / totalFlour) * 100;
-          const hydrationDisplay = formatPercent(hydration);
-          overallHydrationValue.textContent = hydrationDisplay.replace("%", "");
-          overallHydrationSummary.textContent =
-            "Your dough is sitting at around " + hydrationDisplay + " hydration.";
-        } else {
-          overallHydrationValue.textContent = "–";
-          overallHydrationSummary.textContent =
-            "Pop your dough details in to see your hydration.";
-        }
-
-        if (totalFlour > 0) {
-          bakersFlourPctEl.textContent = "100%";
-          bakersFlourGramsEl.textContent = formatGrams(totalFlour);
-
-          const waterPct = (totalWater / totalFlour) * 100;
-          bakersWaterPctEl.textContent = formatPercent(waterPct);
-          bakersWaterGramsEl.textContent = formatGrams(totalWater);
-
-          const starterPct = (starter / totalFlour) * 100;
-          bakersStarterPctEl.textContent = formatPercent(starterPct);
-          bakersStarterGramsEl.textContent = formatGrams(starter);
-
-          const saltPct = salt > 0 ? (salt / totalFlour) * 100 : 0;
-          bakersSaltPctEl.textContent = salt > 0 ? formatPercent(saltPct) : "–%";
-          bakersSaltGramsEl.textContent = salt > 0 ? formatGrams(salt) : "– g";
-        } else {
-          bakersFlourPctEl.textContent = "100%";
-          bakersFlourGramsEl.textContent = "– g";
-          bakersWaterPctEl.textContent = "–%";
-          bakersWaterGramsEl.textContent = "– g";
-          bakersStarterPctEl.textContent = "–%";
-          bakersStarterGramsEl.textContent = "– g";
-          bakersSaltPctEl.textContent = "–%";
-          bakersSaltGramsEl.textContent = "– g";
-        }
-      }
-
-      function applyHydrationPreset(targetHydrationPercent) {
-        const flour = parseNumber(flourInput);
-        const starter = parseNumber(starterInput);
-        const starterHydration = parseNumber(starterHydrationInput);
-
-        const starterParts = getStarterComponents(starter, starterHydration);
-        const starterFlour = starterParts.flour;
-        const starterWater = starterParts.water;
-
-        const totalFlour = flour + starterFlour;
-        if (totalFlour <= 0) {
-          return;
-        }
-
-        const targetHydration = targetHydrationPercent / 100;
-        const requiredTotalWater = targetHydration * totalFlour;
-        let requiredExtraWater = requiredTotalWater - starterWater;
-
-        if (!isFinite(requiredExtraWater) || requiredExtraWater < 0) {
-          requiredExtraWater = 0;
-        }
-
-        const rounded =
-          Math.abs(requiredExtraWater) >= 100
-            ? Math.round(requiredExtraWater)
-            : Math.round(requiredExtraWater * 10) / 10;
-
-        waterInput.value = rounded;
-        updateResults();
-      }
-
-      [flourInput, waterInput, starterInput, starterHydrationInput, saltInput].forEach(
-        (el) => {
-          el.addEventListener("input", updateResults);
-        }
-      );
-
-      recalcBtn.addEventListener("click", updateResults);
-      resetBtn.addEventListener("click", setDefaults);
-
-      presetButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const hydration = parseFloat(btn.getAttribute("data-hydration"));
-          if (!isNaN(hydration)) {
-            applyHydrationPreset(hydration);
-          }
-        });
-      });
-
-      if ("serviceWorker" in navigator) {
-        window.addEventListener("load", () => {
-          navigator.serviceWorker
-            .register("service-worker.js")
-            .catch((err) => console.error("Service worker registration failed:", err));
-        });
-      }
-
-      setDefaults();
-    })();
-  </script>
+  setDefaults();
+})();
+</script>
 </body>
 </html>
