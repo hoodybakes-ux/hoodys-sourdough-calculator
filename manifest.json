@@ -1,20 +1,27 @@
 {
   "name": "Hoody's Hydration Calculator",
   "short_name": "Hydration Calc",
-  "start_url": ".",
+  "description": "Free sourdough hydration calculator by Hoody's Sourdough Kitchen",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#f6f0e8",
   "theme_color": "#0f777e",
+  "lang": "en-AU",
+  "categories": ["food", "utilities"],
   "icons": [
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
